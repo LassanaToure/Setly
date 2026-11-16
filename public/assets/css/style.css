@@ -87,9 +87,10 @@ img { max-width: 100%; display: block; }
 .hero__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.4em; }
 .hero__media { position: relative; height: 320px; }
 .hero__card { position: absolute; border-radius: var(--radius); box-shadow: var(--shadow); }
-.hero__card--1 { inset: 0 30% 40% 0; background: linear-gradient(135deg,#2b2b33,#16161a); }
-.hero__card--2 { inset: 30% 0 10% 35%; background: linear-gradient(135deg,var(--gold),var(--gold-dark)); }
-.hero__card--3 { inset: 55% 45% 0 10%; background: #fff; border: 1px solid var(--line); }
+.hero__card { background-size: cover; background-position: center; }
+.hero__card--1 { inset: 0 30% 40% 0; background-image: url('/assets/img/studios/video-2.jpg'); }
+.hero__card--2 { inset: 30% 0 10% 35%; background-image: url('/assets/img/studios/podcast-2.jpg'); }
+.hero__card--3 { inset: 55% 45% 0 10%; background-image: url('/assets/img/studios/photo-1.jpg'); border: 1px solid var(--line); }
 
 .section__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; gap: 16px; flex-wrap: wrap; }
 .section__head--catalogue { align-items: flex-start; }
