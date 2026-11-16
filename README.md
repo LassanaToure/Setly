@@ -130,19 +130,57 @@ Setly/
 
 ---
 
-## Déploiement en ligne
+## Déploiement en ligne (Render + Aiven + MongoDB Atlas)
 
-L'application est conçue pour un déploiement conteneurisé sur un serveur dédié / VPS :
+L'application se déploie sur **Render** (hébergement de l'application via le `Dockerfile`), avec une base **MySQL managée sur Aiven** et une base **MongoDB sur Atlas** pour les statistiques. HTTPS est fourni automatiquement par Render.
+
+### 1. Base MySQL (Aiven)
+
+1. Créer un service **MySQL** sur [aiven.io](https://aiven.io) (plan gratuit).
+2. Noter l'hôte, le port, l'utilisateur, le mot de passe et le nom de la base, puis télécharger le certificat **`ca.pem`**.
+3. Importer la structure et les données depuis un client MySQL (SSL requis) :
 
 ```bash
-git clone https://github.com/LassanaToure/Setly.git
-cd Setly
-cp .env.example .env            # ajuster APP_ENV=production, identifiants, APP_URL
-docker compose up -d --build
-docker compose exec app php database/sync_mongo.php
+mysql --host=<host-aiven> --port=<port> --user=<user> --password=<pass> \
+      --ssl-ca=ca.pem <nom-base> < database/01_schema.sql
+mysql --host=<host-aiven> --port=<port> --user=<user> --password=<pass> \
+      --ssl-ca=ca.pem <nom-base> < database/02_seed.sql
 ```
 
-Un reverse proxy (Nginx / Traefik) place l'application derrière HTTPS. En production, les cookies de session passent automatiquement en `Secure` (voir `src/Core/Session.php`).
+### 2. Base MongoDB (Atlas)
+
+Créer un cluster gratuit sur [MongoDB Atlas](https://www.mongodb.com/atlas), récupérer l'URI `mongodb+srv://...` et autoriser l'accès réseau (0.0.0.0/0 pour un projet d'école).
+
+### 3. Application (Render)
+
+1. Sur [render.com](https://render.com), **New → Web Service**, connecter le dépôt GitHub `Setly`.
+2. Runtime **Docker**, chemin du Dockerfile `docker/php/Dockerfile` (le fichier `render.yaml` fournit déjà cette configuration).
+3. Renseigner les variables d'environnement :
+
+| Variable      | Valeur                                                        |
+|---------------|--------------------------------------------------------------|
+| `APP_ENV`     | `production`                                                  |
+| `APP_URL`     | l'URL Render (ex. `https://setly.onrender.com`)               |
+| `DB_HOST`     | hôte Aiven                                                     |
+| `DB_PORT`     | port Aiven                                                     |
+| `DB_NAME`     | nom de la base Aiven                                           |
+| `DB_USER`     | utilisateur Aiven                                             |
+| `DB_PASSWORD` | mot de passe Aiven                                            |
+| `DB_SSL_CA`   | **contenu** du certificat `ca.pem` Aiven, collé tel quel      |
+| `MONGODB_URI` | URI MongoDB Atlas (`mongodb+srv://...`)                       |
+| `MONGO_DB`    | nom de la base Mongo (ex. `Setly`)                            |
+
+   Le certificat Aiven n'est pas un fichier à committer : on colle son contenu dans la variable `DB_SSL_CA`, et l'application l'écrit dans un fichier temporaire au démarrage (voir `src/Core/Database.php`).
+
+4. Déployer. Une fois en ligne, alimenter les statistiques via le shell Render :
+
+```bash
+php database/sync_mongo.php
+```
+
+En production (`APP_ENV=production`), les cookies de session passent automatiquement en `Secure` (voir `src/Core/Session.php`), et la connexion MySQL utilise le TLS d'Aiven (`DB_SSL_CA`).
+
+> Pour un test local complet sans ces services, la pile Docker auto-hébergée reste disponible : `docker compose up -d --build` (voir plus haut).
 
 ---
 

@@ -13,8 +13,8 @@ services:
       DB_PORT: "3306"
       DB_NAME: setly
       DB_USER: setly
-      DB_PASS: setly_pass
-      MONGO_URI: "mongodb://mongo:27017"
+      DB_PASSWORD: setly_pass
+      MONGODB_URI: "mongodb://mongo:27017"
       MONGO_DB: setly_stats
       APP_ENV: local
     depends_on:

@@ -13,10 +13,11 @@ return [
         'port' => getenv('DB_PORT') ?: '3306',
         'name' => getenv('DB_NAME') ?: 'setly',
         'user' => getenv('DB_USER') ?: 'setly',
-        'pass' => getenv('DB_PASS') ?: 'setly_pass',
+        'pass' => getenv('DB_PASSWORD') ?: (getenv('DB_PASS') ?: 'setly_pass'),
+        'ssl_ca' => getenv('DB_SSL_CA') ?: '',
     ],
     'mongo' => [
-        'uri' => getenv('MONGO_URI') ?: 'mongodb://127.0.0.1:27017',
+        'uri' => getenv('MONGODB_URI') ?: (getenv('MONGO_URI') ?: 'mongodb://127.0.0.1:27017'),
         'db'  => getenv('MONGO_DB') ?: 'setly_stats',
     ],
 
