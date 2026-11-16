@@ -18,12 +18,12 @@ INSERT INTO studio (id_type, nom, description, capacite, surface_m2, tarif_horai
     (3, 'Studio Photo Lumen',  'Studio photo lumière du jour avec fonds interchangeables, flashs de studio et coin maquillage. Lumineux et modulable.', 6, 40, 6000, 2, 'Les fonds papier endommagés sont facturés. Maquillage autorisé au coin dédié uniquement.', 1);
 
 INSERT INTO studio_photo (id_studio, url, position) VALUES
-    (1, '/assets/img/studios/podcast-1.svg', 0),
-    (1, '/assets/img/studios/podcast-2.svg', 1),
-    (2, '/assets/img/studios/video-1.svg', 0),
-    (2, '/assets/img/studios/video-2.svg', 1),
-    (3, '/assets/img/studios/photo-1.svg', 0),
-    (3, '/assets/img/studios/photo-2.svg', 1);
+    (1, '/assets/img/studios/podcast-1.jpg', 0),
+    (1, '/assets/img/studios/podcast-2.jpg', 1),
+    (2, '/assets/img/studios/video-1.jpg', 0),
+    (2, '/assets/img/studios/video-2.jpg', 1),
+    (3, '/assets/img/studios/photo-1.jpg', 0),
+    (3, '/assets/img/studios/photo-2.jpg', 1);
 
 INSERT INTO equipement_inclus (id_studio, libelle) VALUES
     (1, '4 micros Shure SM7B'), (1, 'Table de mixage Rodecaster'), (1, 'Casques de monitoring'),
@@ -85,6 +85,3 @@ INSERT INTO reservation_suivi (id_reservation, statut, commentaire, date_changem
     (1, 'terminee',       'Prestation terminée.',              DATE_SUB(NOW(), INTERVAL 10 DAY)),
     (2, 'en_attente',     'Réservation créée par le client.',  DATE_SUB(NOW(), INTERVAL 2 DAY)),
     (2, 'confirmee',      'Confirmée par l''équipe Setly.',    DATE_SUB(NOW(), INTERVAL 1 DAY));
-
-INSERT INTO avis (id_reservation, id_utilisateur, id_studio, note, commentaire, statut_moderation, date_creation) VALUES
-    (1, 3, 3, 5, 'Studio lumineux et très bien équipé, accueil au top. Je reviendrai pour mes prochains shootings.', 'valide', DATE_SUB(NOW(), INTERVAL 9 DAY));

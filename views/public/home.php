@@ -40,6 +40,7 @@
     </div>
 </section>
 
+<?php if ($avis): ?>
 <section class="section section--alt">
     <div class="container">
         <div class="section__head"><h2>Ils ont tourné chez Setly</h2></div>
@@ -53,12 +54,10 @@
                     <footer><?= e($a['prenom']) ?> - <?= e($a['studio_nom']) ?></footer>
                 </blockquote>
             <?php endforeach; ?>
-            <?php if (!$avis): ?>
-                <p class="muted">Les premiers avis clients s'afficheront ici.</p>
-            <?php endif; ?>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <section class="container section">
     <div class="steps">
