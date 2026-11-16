@@ -14,7 +14,7 @@ INSERT INTO utilisateur (id_role, nom, prenom, email, mot_de_passe_hash, telepho
 
 INSERT INTO studio (id_type, nom, description, capacite, surface_m2, tarif_horaire_cents, duree_min_heures, conditions, actif) VALUES
     (1, 'Studio Podcast Onde', 'Studio podcast insonorisé, table ronde 4 places, traitement acoustique professionnel et éclairage d''ambiance. Idéal pour enregistrements audio et vidéo courts.', 4, 18, 4500, 2, 'Arrivée 15 min avant le créneau. Aucune nourriture dans la cabine. Matériel fourni à restituer en fin de session.', 1),
-    (2, 'Studio Vidéo Nord',   'Grand plateau vidéo avec fond vert cyclo, grill d''éclairage et régie. Parfait pour interviews, clips et formats courts.', 10, 60, 9000, 2, 'Accès quai de déchargement sur réservation. Port de chaussures propres obligatoire sur le cyclo. Fumée et flammes interdites.', 1),
+    (2, 'Studio Vidéo Nord',   'Grand plateau vidéo avec fond vert cyclo, grill d''éclairage et régie. Parfait pour interviews, clips et formats courts.', 10, 60, 5500, 2, 'Accès quai de déchargement sur réservation. Port de chaussures propres obligatoire sur le cyclo. Fumée et flammes interdites.', 1),
     (3, 'Studio Photo Lumen',  'Studio photo lumière du jour avec fonds interchangeables, flashs de studio et coin maquillage. Lumineux et modulable.', 6, 40, 6000, 2, 'Les fonds papier endommagés sont facturés. Maquillage autorisé au coin dédié uniquement.', 1);
 
 INSERT INTO studio_photo (id_studio, url, position) VALUES
@@ -70,7 +70,7 @@ INSERT INTO reservation
      mode_retrait, livraison_km, prix_studio_cents, reduction_cents, prix_materiel_cents, livraison_cents, total_cents, statut, date_creation)
 VALUES
     (4, 2, 'SE-10002', DATE_ADD(CURDATE(), INTERVAL 4 DAY), '09:00:00', 8, 6,
-     'livraison', 12, 72000, 7200, 8000, 1208, 74008, 'confirmee', DATE_SUB(NOW(), INTERVAL 2 DAY));
+     'livraison', 12, 44000, 4400, 8000, 1208, 48808, 'confirmee', DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 INSERT INTO reservation_materiel (id_reservation, id_materiel, quantite, prix_unitaire_cents) VALUES
     (2, 1, 1, 8000);
