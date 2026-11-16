@@ -1,0 +1,8 @@
+CREATE DATABASE IF NOT EXISTS setly CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE USER IF NOT EXISTS 'setly'@'localhost' IDENTIFIED BY 'setly_pass';
+CREATE USER IF NOT EXISTS 'setly'@'127.0.0.1' IDENTIFIED BY 'setly_pass';
+
+GRANT ALL PRIVILEGES ON setly.* TO 'setly'@'localhost';
+GRANT ALL PRIVILEGES ON setly.* TO 'setly'@'127.0.0.1';
+FLUSH PRIVILEGES;

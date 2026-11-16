@@ -1,0 +1,81 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: setly_app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: setly
+      DB_USER: setly
+      DB_PASS: setly_pass
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_DB: setly_stats
+      APP_ENV: local
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+    networks:
+      - setly_net
+
+  db:
+    image: mysql:8.0
+    container_name: setly_db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: setly
+      MYSQL_USER: setly
+      MYSQL_PASSWORD: setly_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - setly_net
+
+  mongo:
+    image: mongo:7.0
+    container_name: setly_mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - setly_net
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: setly_pma
+    environment:
+      PMA_HOST: db
+      PMA_USER: setly
+      PMA_PASSWORD: setly_pass
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - setly_net
+
+volumes:
+  db_data:
+  mongo_data:
+
+networks:
+  setly_net:
+    driver: bridge
