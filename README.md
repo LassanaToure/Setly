@@ -92,8 +92,10 @@ Mot de passe commun : **`Setly@2025!`**
 
 ```
 Setly/
-├── docker-compose.yml          # Orchestration des 4 services
-├── docker/php/Dockerfile       # Image PHP-Apache + extensions pdo_mysql & mongodb
+├── docker-compose.yml          # Orchestration des 4 services (dev local)
+├── render.yaml                 # Configuration de déploiement Render
+├── router.php                  # Routeur du serveur intégré PHP (lancement sans Docker)
+├── docker/php/                 # Dockerfile, vhost.conf, entrypoint.sh
 ├── public/
 │   ├── index.php               # Front controller (point d'entrée unique)
 │   ├── .htaccess               # Réécriture d'URL vers le front controller
@@ -107,11 +109,11 @@ Setly/
 │   ├── Service/                # Logique métier (TarifService, ReservationService, StatsService)
 │   └── Controller/             # Contrôleurs par espace (Public, Auth, Client, Employe, Admin)
 ├── views/                      # Templates PHP + partials réutilisés
-├── database/
-│   ├── 01_schema.sql           # Création des tables
-│   ├── 02_seed.sql             # Données de démonstration
-│   └── sync_mongo.php          # Synchronisation MySQL → MongoDB
-└── docs/                       # Dossier projet + diagrammes
+└── database/
+    ├── 00_setup_local.sql      # Création base + utilisateur (local, sans Docker)
+    ├── 01_schema.sql           # Création des tables
+    ├── 02_seed.sql             # Données de démonstration
+    └── sync_mongo.php          # Synchronisation MySQL → MongoDB
 ```
 
 ---
@@ -186,14 +188,14 @@ En production (`APP_ENV=production`), les cookies de session passent automatique
 
 ## Gestion de projet
 
-- Suivi des tâches sur un tableau Kanban (Trello / Notion) - lien fourni dans le dossier projet.
+- Suivi des tâches sur un tableau Kanban Notion public : https://oil-look-41e.notion.site/41a1a7f1505b811eb428fa358b2a57ce
 - Dépôt Git public avec stratégie de branches : `main` (stable) et `develop` (intégration).
 
 ---
 
 ## Documentation
 
-Le **dossier projet** complet (`docs/Dossier_Projet_Setly.docx`) détaille l'ensemble des compétences
-du référentiel : environnement, maquettes et wireframes, interfaces statiques et dynamiques,
+Le **dossier projet** complet (fourni avec le rendu, en dehors de ce dépôt) détaille l'ensemble des
+compétences du référentiel : environnement, maquettes et wireframes, interfaces statiques et dynamiques,
 modèle de données (MCD / MLD / MPD), composants SQL et NoSQL, composants métier, sécurité,
 jeu d'essai et veille sécurité.
