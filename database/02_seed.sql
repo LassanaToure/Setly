@@ -81,6 +81,7 @@ INSERT INTO reservation_materiel (id_reservation, id_materiel, quantite, prix_un
 INSERT INTO reservation_suivi (id_reservation, statut, commentaire, date_changement) VALUES
     (1, 'en_attente',     'Réservation créée par le client.', DATE_SUB(NOW(), INTERVAL 15 DAY)),
     (1, 'confirmee',      'Confirmée par l''équipe Setly.',    DATE_SUB(NOW(), INTERVAL 14 DAY)),
+    (1, 'en_preparation', 'En préparation du tournage.',       DATE_SUB(NOW(), INTERVAL 12 DAY)),
     (1, 'en_cours',       'Prestation en cours.',              DATE_SUB(NOW(), INTERVAL 10 DAY)),
     (1, 'terminee',       'Prestation terminée.',              DATE_SUB(NOW(), INTERVAL 10 DAY)),
     (2, 'en_attente',     'Réservation créée par le client.',  DATE_SUB(NOW(), INTERVAL 2 DAY)),

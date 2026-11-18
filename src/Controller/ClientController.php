@@ -18,6 +18,7 @@ use App\Model\ReservationSuivi;
 use App\Model\Studio;
 use App\Model\Utilisateur;
 use App\Service\ReservationService;
+use App\Service\StatsService;
 use App\Service\TarifService;
 
 final class ClientController extends Controller
@@ -84,6 +85,16 @@ final class ClientController extends Controller
 
         if (!$creneau || (int) $creneau['id_studio'] !== (int) $studio['id_studio']) {
             $v->addError('id_creneau', 'Ce créneau n\'est pas valide pour ce studio.');
+        } else {
+            $debut   = strtotime((string) $creneau['heure_debut']);
+            $fin     = strtotime((string) $creneau['heure_fin']);
+            $fenetre = ($debut !== false && $fin !== false && $fin > $debut)
+                ? (int) floor(($fin - $debut) / 3600)
+                : 0;
+            $dureeDemandee = (int) $request->input('duree_heures', 0);
+            if ($fenetre > 0 && $dureeDemandee > $fenetre) {
+                $v->addError('duree_heures', "La durée demandée dépasse le créneau choisi ({$fenetre} h disponibles).");
+            }
         }
 
         $mode = $request->input('mode_retrait') === 'livraison' ? 'livraison' : 'sur_place';
@@ -189,7 +200,7 @@ final class ClientController extends Controller
         $studio = Studio::find((int) $resa['id_studio']);
 
         $v = new Validator($request->all());
-        $v->required('date_tournage', 'Date')->date('date_tournage')
+        $v->required('date_tournage', 'Date')->date('date_tournage', 'Date')
           ->integer('duree_heures', 'Durée', (int) $studio['duree_min_heures'])
           ->integer('nb_personnes', 'Nombre de personnes', 1, (int) $studio['capacite']);
 
@@ -213,6 +224,7 @@ final class ClientController extends Controller
             'total_cents'       => $total,
         ]);
         ReservationSuivi::add((int) $id, $resa['statut'], 'Réservation modifiée par le client.');
+        StatsService::upsertFait(Reservation::find((int) $id) ?? []);
 
         $this->flash('success', 'Votre réservation a été mise à jour.');
         $this->redirect('/reservation/' . $id);
@@ -232,6 +244,7 @@ final class ClientController extends Controller
         ReservationSuivi::add((int) $id, 'annulee', 'Annulée par le client.');
 
         $this->releaseCreneau($resa);
+        StatsService::upsertFait(Reservation::find((int) $id) ?? []);
 
         $this->flash('success', 'Votre réservation a été annulée.');
         $this->redirect('/mes-reservations');

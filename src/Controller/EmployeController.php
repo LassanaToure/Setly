@@ -202,7 +202,7 @@ final class EmployeController extends Controller
         Csrf::validate($request->all());
         $v = new Validator($request->all());
         $v->required('id_studio', 'Studio')
-          ->required('date', 'Date')->date('date')
+          ->required('date', 'Date')->date('date', 'Date')
           ->required('heure_debut', 'Heure de début')
           ->required('heure_fin', 'Heure de fin');
         if ($v->fails()) {

@@ -71,6 +71,7 @@ final class ReservationService
             ReservationSuivi::add($idResa, 'en_attente', 'Réservation créée par le client.', $pdo);
 
             $pdo->commit();
+            StatsService::upsertFait(Reservation::find($idResa) ?? []);
             return ['ok' => true, 'id' => $idResa, 'reference' => $reference];
         } catch (\Throwable $e) {
             $pdo->rollBack();
@@ -104,6 +105,7 @@ final class ReservationService
             $commentaire .= " — Client contacté par {$contactMode}. Motif : {$motif}";
         }
         ReservationSuivi::add((int) $resa['id_reservation'], $to, $commentaire);
+        StatsService::upsertFait(Reservation::find((int) $resa['id_reservation']) ?? []);
 
         return ['ok' => true];
     }
