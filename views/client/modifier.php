@@ -4,7 +4,7 @@
         <span aria-hidden="true">/</span> Modifier
     </nav>
     <h1>Modifier la réservation</h1>
-    <p class="info-box">Le studio (<strong><?= e($resa['studio_nom']) ?></strong>) ne peut pas être changé. Vous pouvez ajuster la date, l'horaire, la durée et le nombre de personnes tant que la réservation est en attente.</p>
+    <p class="info-box">Le studio (<strong><?= e($studio['nom']) ?></strong>) ne peut pas être changé. Vous pouvez ajuster la date, l'horaire, la durée et le nombre de personnes tant que la réservation est en attente.</p>
 
     <form action="/reservation/<?= (int) $resa['id_reservation'] ?>/modifier" method="post" class="form" novalidate data-validate>
         <?= csrf_field() ?>

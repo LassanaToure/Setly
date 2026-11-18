@@ -99,6 +99,6 @@ final class AdminController extends Controller
             'reservations'=> array_map('intval', array_column($parStudio, 'nb')),
             'ca'          => array_map(static fn ($r) => round($r['ca_cents'] / 100, 2), $parStudio),
             'indicateurs' => StatsService::indicateurs($parStudio),
-        ]);
+        ], 200, ['Cache-Control' => 'no-store']);
     }
 }

@@ -77,7 +77,7 @@
   }
 
   function fetchAndRender(params) {
-    fetch('/admin/statistiques/data?' + params, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    fetch('/admin/statistiques/data?' + params, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(render)
       .catch(function () {});

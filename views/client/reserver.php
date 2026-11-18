@@ -24,7 +24,7 @@
                         <select id="id_creneau" name="id_creneau" required data-rule="required">
                             <option value="">- Choisir un créneau -</option>
                             <?php foreach ($creneaux as $c): ?>
-                                <option value="<?= (int) $c['id_creneau'] ?>">
+                                <option value="<?= (int) $c['id_creneau'] ?>" <?= (old($old, 'id_creneau') == $c['id_creneau']) ? 'selected' : '' ?>>
                                     <?= e(date('d/m/Y', strtotime($c['date']))) ?> ·
                                     <?= e(substr((string) $c['heure_debut'], 0, 5)) ?>-<?= e(substr((string) $c['heure_fin'], 0, 5)) ?>
                                 </option>
@@ -44,7 +44,7 @@
                                    value="<?= old($old, 'duree_heures', (string) $studio['duree_min_heures']) ?>"
                                    required data-rule="required|min:<?= (int) $studio['duree_min_heures'] ?>">
                             <p class="field__hint">Minimum <?= (int) $studio['duree_min_heures'] ?> h. Réduction de 10 % dès 8 h (journée).</p>
-                            <p class="field__error" data-error-for="duree_heures"></p>
+                            <p class="field__error" data-error-for="duree_heures"><?= e($errors['duree_heures'] ?? '') ?></p>
                         </div>
                         <div class="field">
                             <label for="nb_personnes">Nombre de personnes <span class="req">*</span></label>
@@ -52,7 +52,7 @@
                                    value="<?= old($old, 'nb_personnes', '1') ?>"
                                    required data-rule="required|min:1|max:<?= (int) $studio['capacite'] ?>">
                             <p class="field__hint">Capacité maximum : <?= (int) $studio['capacite'] ?> personnes.</p>
-                            <p class="field__error" data-error-for="nb_personnes"></p>
+                            <p class="field__error" data-error-for="nb_personnes"><?= e($errors['nb_personnes'] ?? '') ?></p>
                         </div>
                     </div>
                 </fieldset>
