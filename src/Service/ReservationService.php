@@ -100,6 +100,10 @@ final class ReservationService
 
         Reservation::updateStatut((int) $resa['id_reservation'], $to);
 
+        if ($to === 'annulee') {
+            Creneau::releaseForReservation($resa);
+        }
+
         $commentaire = self::LABELS[$to];
         if ($to === 'annulee') {
             $commentaire .= " — Client contacté par {$contactMode}. Motif : {$motif}";
@@ -108,6 +112,34 @@ final class ReservationService
         StatsService::upsertFait(Reservation::find((int) $resa['id_reservation']) ?? []);
 
         return ['ok' => true];
+    }
+
+    /**
+     * Change le créneau d'une réservation : réserve le nouveau (verrou anti double-réservation)
+     * et libère l'ancien, dans une transaction.
+     */
+    public static function reassignCreneau(int $oldCreneauId, int $newCreneauId): array
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            if (!Creneau::lockAndReserve($pdo, $newCreneauId)) {
+                $pdo->rollBack();
+                return ['ok' => false, 'error' => 'Ce créneau vient d\'être réservé. Merci d\'en choisir un autre.'];
+            }
+
+            if ($oldCreneauId > 0) {
+                $stmt = $pdo->prepare("UPDATE creneau SET disponible = 1 WHERE id_creneau = :id");
+                $stmt->execute([':id' => $oldCreneauId]);
+            }
+
+            $pdo->commit();
+            return ['ok' => true];
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'Une erreur est survenue lors du changement de créneau.'];
+        }
     }
 
     public static function clientCanEdit(array $resa): bool

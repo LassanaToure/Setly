@@ -82,4 +82,42 @@ final class Creneau
         $stmt->execute([':s' => $idStudio]);
         return $stmt->fetchAll();
     }
+
+    /**
+     * Créneaux proposables à la modification : les créneaux disponibles du studio,
+     * plus celui actuellement occupé par la réservation (pour permettre de le garder).
+     */
+    public static function availableForEdit(int $idStudio, int $currentCreneauId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT * FROM creneau
+             WHERE id_studio = :s AND date >= CURDATE()
+               AND (disponible = 1 OR id_creneau = :cur)
+             ORDER BY date, heure_debut LIMIT 100"
+        );
+        $stmt->execute([':s' => $idStudio, ':cur' => $currentCreneauId]);
+        return $stmt->fetchAll();
+    }
+
+    /** Identifiant du créneau occupé par une réservation (par studio + date + heure), ou 0. */
+    public static function idForReservation(array $resa): int
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT id_creneau FROM creneau
+             WHERE id_studio = :s AND date = :d AND heure_debut = :h LIMIT 1"
+        );
+        $stmt->execute([':s' => $resa['id_studio'], ':d' => $resa['date_tournage'], ':h' => $resa['heure_debut']]);
+        $cid = $stmt->fetchColumn();
+        return $cid ? (int) $cid : 0;
+    }
+
+    /** Remet à disponible le créneau occupé par une réservation (annulation). */
+    public static function releaseForReservation(array $resa): void
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE creneau SET disponible = 1
+             WHERE id_studio = :s AND date = :d AND heure_debut = :h"
+        );
+        $stmt->execute([':s' => $resa['id_studio'], ':d' => $resa['date_tournage'], ':h' => $resa['heure_debut']]);
+    }
 }

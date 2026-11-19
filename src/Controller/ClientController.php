@@ -178,12 +178,16 @@ final class ClientController extends Controller
             $this->redirect('/reservation/' . $id);
         }
 
+        $currentCreneauId = Creneau::idForReservation($resa);
+
         $this->view('client/modifier', [
-            'title'  => 'Modifier la réservation ' . $resa['reference'],
-            'resa'   => $resa,
-            'studio' => Studio::find((int) $resa['id_studio']),
-            'old'    => $this->oldInput(),
-            'errors' => $this->takeErrors(),
+            'title'            => 'Modifier la réservation ' . $resa['reference'],
+            'resa'             => $resa,
+            'studio'           => Studio::find((int) $resa['id_studio']),
+            'creneaux'         => Creneau::availableForEdit((int) $resa['id_studio'], $currentCreneauId),
+            'currentCreneauId' => $currentCreneauId,
+            'old'              => $this->oldInput(),
+            'errors'           => $this->takeErrors(),
         ]);
     }
 
@@ -197,16 +201,42 @@ final class ClientController extends Controller
             $this->redirect('/reservation/' . $id);
         }
 
-        $studio = Studio::find((int) $resa['id_studio']);
+        $studio  = Studio::find((int) $resa['id_studio']);
+        $creneau = Creneau::find((int) $request->input('id_creneau', 0));
 
         $v = new Validator($request->all());
-        $v->required('date_tournage', 'Date')->date('date_tournage', 'Date')
+        $v->required('id_creneau', 'Créneau')
           ->integer('duree_heures', 'Durée', (int) $studio['duree_min_heures'])
           ->integer('nb_personnes', 'Nombre de personnes', 1, (int) $studio['capacite']);
+
+        if (!$creneau || (int) $creneau['id_studio'] !== (int) $studio['id_studio']) {
+            $v->addError('id_creneau', 'Ce créneau n\'est pas valide pour ce studio.');
+        } else {
+            $debut   = strtotime((string) $creneau['heure_debut']);
+            $fin     = strtotime((string) $creneau['heure_fin']);
+            $fenetre = ($debut !== false && $fin !== false && $fin > $debut)
+                ? (int) floor(($fin - $debut) / 3600)
+                : 0;
+            $dureeDemandee = (int) $request->input('duree_heures', 0);
+            if ($fenetre > 0 && $dureeDemandee > $fenetre) {
+                $v->addError('duree_heures', "La durée demandée dépasse le créneau choisi ({$fenetre} h disponibles).");
+            }
+        }
 
         if ($v->fails()) {
             $this->withInput($request->all(), $v->errors());
             $this->redirect('/reservation/' . $id . '/modifier');
+        }
+
+        $currentCreneauId = Creneau::idForReservation($resa);
+        $newCreneauId     = (int) $creneau['id_creneau'];
+
+        if ($newCreneauId !== $currentCreneauId) {
+            $result = ReservationService::reassignCreneau($currentCreneauId, $newCreneauId);
+            if (!$result['ok']) {
+                $this->flash('error', $result['error']);
+                $this->redirect('/reservation/' . $id . '/modifier');
+            }
         }
 
         $duree = (int) $request->input('duree_heures');
@@ -215,8 +245,8 @@ final class ClientController extends Controller
         $total = $tarif['prix_studio_net_cents'] + (int) $resa['prix_materiel_cents'] + (int) $resa['livraison_cents'];
 
         Reservation::updateDetails((int) $id, [
-            'date_tournage'     => $request->input('date_tournage'),
-            'heure_debut'       => $request->input('heure_debut', $resa['heure_debut']),
+            'date_tournage'     => $creneau['date'],
+            'heure_debut'       => $creneau['heure_debut'],
             'duree_heures'      => $duree,
             'nb_personnes'      => (int) $request->input('nb_personnes'),
             'prix_studio_cents' => $tarif['prix_studio_cents'],
@@ -243,7 +273,7 @@ final class ClientController extends Controller
         Reservation::updateStatut((int) $id, 'annulee');
         ReservationSuivi::add((int) $id, 'annulee', 'Annulée par le client.');
 
-        $this->releaseCreneau($resa);
+        Creneau::releaseForReservation($resa);
         StatsService::upsertFait(Reservation::find((int) $id) ?? []);
 
         $this->flash('success', 'Votre réservation a été annulée.');
@@ -374,17 +404,4 @@ final class ClientController extends Controller
         return $out;
     }
 
-    private function releaseCreneau(array $resa): void
-    {
-        $creneaux = Creneau::availableFor((int) $resa['id_studio'], $resa['date_tournage']);
-
-        $all = \App\Core\Database::connection()->prepare(
-            "SELECT id_creneau FROM creneau WHERE id_studio = :s AND date = :d AND heure_debut = :h LIMIT 1"
-        );
-        $all->execute([':s' => $resa['id_studio'], ':d' => $resa['date_tournage'], ':h' => $resa['heure_debut']]);
-        $cid = $all->fetchColumn();
-        if ($cid) {
-            Creneau::release((int) $cid);
-        }
-    }
 }
